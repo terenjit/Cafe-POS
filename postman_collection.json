@@ -1,0 +1,1040 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Terenjit Cafe POS",
+    "description": "API collection for Terenjit Cafe Point of Sale System.\n\nVariables:\n- {{base_url}} — set via environment (Local or Production)\n- {{token}}    — paste the access_token from the Login response\n\nImport the matching environment file before running requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"email\": \"budi@terenjitcafe.com\",\n\t\"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Authenticate as owner or cashier. Returns access_token and refresh_token. Copy access_token into the {{token}} variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"refresh_token\": \"dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Issue a new access token using a valid refresh token. No Authorization header required."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            },
+            "description": "Revoke the current access and refresh tokens server-side."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "categories"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true }
+              ]
+            },
+            "description": "List all non-deleted categories."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Merchandise\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "categories"]
+            },
+            "description": "Create a new product category."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Non-Coffee\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/categories/:category_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "categories", ":category_id"],
+              "variable": [
+                { "key": "category_id", "value": "cat-uuid-001", "description": "Category UUID" }
+              ]
+            },
+            "description": "Rename an existing category."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/categories/:category_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "categories", ":category_id"],
+              "variable": [
+                { "key": "category_id", "value": "cat-uuid-001", "description": "Category UUID" }
+              ]
+            },
+            "description": "Soft-delete a category. Fails if the category has active products."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "category_id", "value": "cat-uuid-001", "disabled": true },
+                { "key": "search", "value": "kopi", "disabled": true },
+                { "key": "is_available", "value": "true", "disabled": true }
+              ]
+            },
+            "description": "List all non-deleted products. Supports filtering by category, name, and availability."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ]
+            },
+            "description": "Get a single product by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"category_id\": \"cat-uuid-001\",\n\t\"name\": \"Kopi Susu\",\n\t\"description\": \"Espresso with fresh milk\",\n\t\"price\": 30000,\n\t\"image_url\": \"https://storage.example.com/products/kopi-susu.jpg\",\n\t\"is_available\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products"]
+            },
+            "description": "Create a new product. image_url must be a pre-uploaded storage URL."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"category_id\": \"cat-uuid-001\",\n\t\"name\": \"Kopi Susu Segar\",\n\t\"description\": \"Double shot espresso with fresh full-cream milk\",\n\t\"price\": 32000,\n\t\"image_url\": \"https://storage.example.com/products/kopi-susu-v2.jpg\",\n\t\"is_available\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ]
+            },
+            "description": "Fully update a product including is_available toggle."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ]
+            },
+            "description": "Soft-delete a product. Historical order_items are preserved."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stock",
+      "item": [
+        {
+          "name": "Get Stock Level",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id/stock",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id", "stock"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ]
+            },
+            "description": "Get the current computed stock level for a product (SUM of stock_movements)."
+          },
+          "response": []
+        },
+        {
+          "name": "Adjust Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"quantity\": -5,\n\t\"note\": \"Expired stock removed after daily check\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id/stock/adjustment",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id", "stock", "adjustment"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ]
+            },
+            "description": "Record a manual stock adjustment. Positive quantity adds stock; negative reduces it. note is required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stock Movements",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/products/:product_id/stock/movements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "products", ":product_id", "stock", "movements"],
+              "variable": [
+                { "key": "product_id", "value": "prod-uuid-001", "description": "Product UUID" }
+              ],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "type", "value": "sale", "description": "purchase | sale | adjustment | return", "disabled": true }
+              ]
+            },
+            "description": "List the stock movement history for a product, newest first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "Get All Tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/tables",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "tables"],
+              "query": [
+                { "key": "is_active", "value": "true", "disabled": true }
+              ]
+            },
+            "description": "List all tables including inactive ones."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"VIP Room\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/tables",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "tables"]
+            },
+            "description": "Add a new cafe table."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Table",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Table 1 - Window Seat\",\n\t\"is_active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/tables/:table_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "tables", ":table_id"],
+              "variable": [
+                { "key": "table_id", "value": "tbl-uuid-001", "description": "Table UUID" }
+              ]
+            },
+            "description": "Rename a table and/or change its active status."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Table",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/tables/:table_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "tables", ":table_id"],
+              "variable": [
+                { "key": "table_id", "value": "tbl-uuid-001", "description": "Table UUID" }
+              ]
+            },
+            "description": "Deactivate a table. Fails if the table has an open order."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cashiers",
+      "item": [
+        {
+          "name": "Get All Cashiers",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/cashiers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "cashiers"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "is_active", "value": "true", "disabled": true }
+              ]
+            },
+            "description": "List all cashier accounts including deactivated ones."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Cashier",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Siti Rahayu\",\n\t\"email\": \"siti@terenjitcafe.com\",\n\t\"password\": \"initialpassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/cashiers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "cashiers"]
+            },
+            "description": "Create a new cashier account. Active immediately."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Cashier",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Siti Rahayu Putri\",\n\t\"email\": \"siti.putri@terenjitcafe.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/cashiers/:cashier_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "cashiers", ":cashier_id"],
+              "variable": [
+                { "key": "cashier_id", "value": "user-uuid-002", "description": "Cashier UUID" }
+              ]
+            },
+            "description": "Update cashier name and/or email."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Cashier Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/cashiers/:cashier_id/toggle-status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "cashiers", ":cashier_id", "toggle-status"],
+              "variable": [
+                { "key": "cashier_id", "value": "user-uuid-002", "description": "Cashier UUID" }
+              ]
+            },
+            "description": "Toggle cashier is_active. Deactivating blocks login immediately."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Promos",
+      "item": [
+        {
+          "name": "Get All Promos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/promos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "promos"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "is_active", "value": "true", "disabled": true }
+              ]
+            },
+            "description": "List all promotions."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Promo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Happy Hour\",\n\t\"description\": \"10% off all drinks\",\n\t\"discount_type\": \"percentage\",\n\t\"discount_percentage\": 10.00,\n\t\"discount_fixed_amount\": null,\n\t\"min_transaction_amount\": null,\n\t\"valid_from\": \"2026-06-01\",\n\t\"valid_until\": \"2026-06-30\",\n\t\"is_active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/promos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "promos"]
+            },
+            "description": "Create a promotion. For fixed discount, use discount_type: \"fixed\" and set discount_fixed_amount instead."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Promo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"Happy Hour Extended\",\n\t\"description\": \"15% off all drinks\",\n\t\"discount_type\": \"percentage\",\n\t\"discount_percentage\": 15.00,\n\t\"discount_fixed_amount\": null,\n\t\"min_transaction_amount\": null,\n\t\"valid_from\": \"2026-06-01\",\n\t\"valid_until\": \"2026-07-31\",\n\t\"is_active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/promos/:promo_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "promos", ":promo_id"],
+              "variable": [
+                { "key": "promo_id", "value": "promo-uuid-001", "description": "Promo UUID" }
+              ]
+            },
+            "description": "Fully update a promotion."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Promo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/promos/:promo_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "promos", ":promo_id"],
+              "variable": [
+                { "key": "promo_id", "value": "promo-uuid-001", "description": "Promo UUID" }
+              ]
+            },
+            "description": "Delete a promotion. Past orders that used this promo retain their recorded discount."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/reports/revenue?period=weekly&date=2026-05-12",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "reports", "revenue"],
+              "query": [
+                { "key": "period", "value": "weekly", "description": "daily | weekly | monthly", "disabled": false },
+                { "key": "date", "value": "2026-05-12", "description": "YYYY-MM-DD for daily/weekly, YYYY-MM for monthly", "disabled": false }
+              ]
+            },
+            "description": "Total revenue and order count for the period, broken down by day."
+          },
+          "response": []
+        },
+        {
+          "name": "Top Products Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/reports/top-products?period=monthly&date=2026-05&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "reports", "top-products"],
+              "query": [
+                { "key": "period", "value": "monthly", "description": "daily | weekly | monthly", "disabled": false },
+                { "key": "date", "value": "2026-05", "description": "YYYY-MM-DD for daily/weekly, YYYY-MM for monthly", "disabled": false },
+                { "key": "limit", "value": "10", "description": "Max products returned, default 10, max 50", "disabled": true }
+              ]
+            },
+            "description": "Products ranked by total units sold in the period."
+          },
+          "response": []
+        },
+        {
+          "name": "Cashier Summary Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/reports/cashier-summary?period=daily&date=2026-05-12",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "reports", "cashier-summary"],
+              "query": [
+                { "key": "period", "value": "daily", "description": "daily | weekly | monthly", "disabled": false },
+                { "key": "date", "value": "2026-05-12", "description": "YYYY-MM-DD for daily/weekly, YYYY-MM for monthly", "disabled": false }
+              ]
+            },
+            "description": "Order count and total revenue per cashier for the period."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Report (CSV)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/owner/reports/export?type=revenue&period=monthly&date=2026-05",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "owner", "reports", "export"],
+              "query": [
+                { "key": "type", "value": "revenue", "description": "revenue | top-products | cashier-summary", "disabled": false },
+                { "key": "period", "value": "monthly", "description": "daily | weekly | monthly", "disabled": false },
+                { "key": "date", "value": "2026-05", "description": "YYYY-MM-DD for daily/weekly, YYYY-MM for monthly", "disabled": false },
+                { "key": "limit", "value": "10", "description": "For type=top-products only", "disabled": true }
+              ]
+            },
+            "description": "Download any report as a CSV file. Response: Content-Type text/csv with file download."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Shifts",
+      "item": [
+        {
+          "name": "Open Shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"opening_cash\": 500000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/shifts/open",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "shifts", "open"]
+            },
+            "description": "Open a new shift. Fails if the cashier already has an open shift."
+          },
+          "response": []
+        },
+        {
+          "name": "Close Shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"closing_cash\": 1750000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/shifts/close",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "shifts", "close"]
+            },
+            "description": "Close the cashier's current open shift and return the shift summary."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Shift",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/shifts/current",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "shifts", "current"]
+            },
+            "description": "Get the cashier's currently open shift. Returns 404 if no shift is open."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"table_id\": \"tbl-uuid-003\",\n\t\"items\": [\n\t\t{ \"product_id\": \"prod-uuid-001\", \"quantity\": 2 },\n\t\t{ \"product_id\": \"prod-uuid-005\", \"quantity\": 1 }\n\t]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders"]
+            },
+            "description": "Create a new draft order. table_id is optional for takeaway. Items can also be added later via POST /items."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Get a single order with full item detail. Must belong to the cashier's current shift."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Items to Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"items\": [\n\t\t{ \"product_id\": \"prod-uuid-007\", \"quantity\": 2 }\n\t]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/items",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "items"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Add one or more items to a draft order. If the product already exists, its quantity is incremented."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"quantity\": 4\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/items/:item_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "items", ":item_id"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" },
+                { "key": "item_id", "value": "item-uuid-001", "description": "Order Item UUID" }
+              ]
+            },
+            "description": "Update the quantity of a single item. To remove, use DELETE instead."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Order Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/items/:item_id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "items", ":item_id"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" },
+                { "key": "item_id", "value": "item-uuid-001", "description": "Order Item UUID" }
+              ]
+            },
+            "description": "Remove a single item from a draft order."
+          },
+          "response": []
+        },
+        {
+          "name": "Apply Promo",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" },
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"promo_id\": \"promo-uuid-001\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/promo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "promo"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Apply an active promo to a draft order. Replaces any previously applied promo."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Promo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/promo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "promo"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Remove the applied promo from a draft order and recalculate the total."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order History",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", "history"],
+              "query": [
+                { "key": "status", "value": "paid", "description": "draft | pending_payment | paid | cancelled", "disabled": true },
+                { "key": "page", "value": "1", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true }
+              ]
+            },
+            "description": "List all orders from the cashier's current open shift, newest first."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Checkout (Create Snap Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "checkout"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Initiate payment. Moves order to pending_payment and returns a Midtrans Snap token. Stock decrements only after webhook confirmation."
+          },
+          "response": []
+        },
+        {
+          "name": "Midtrans Webhook",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"transaction_time\": \"2026-05-12 08:44:32\",\n\t\"transaction_status\": \"settlement\",\n\t\"transaction_id\": \"c7d1f2a0-3b45-4e89-a12c-f3d456789012\",\n\t\"order_id\": \"TCAFE-20260512-001\",\n\t\"payment_type\": \"gopay\",\n\t\"gross_amount\": \"117000.00\",\n\t\"signature_key\": \"abc123hashedvalue...\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks/midtrans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "webhooks", "midtrans"]
+            },
+            "description": "Public endpoint called by Midtrans. Verifies signature_key, then updates payment/order status and decrements stock on settlement."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cashier/orders/:order_id/payment-status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cashier", "orders", ":order_id", "payment-status"],
+              "variable": [
+                { "key": "order_id", "value": "order-uuid-001", "description": "Order UUID" }
+              ]
+            },
+            "description": "Poll Midtrans payment status for an order after the Snap popup closes."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Override with the Local or Production environment"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Paste the access_token from the Login response"
+    }
+  ]
+}
