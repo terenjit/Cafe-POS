@@ -1,9 +1,8 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/terenjit/Cafe-POS/pkg/response"
 )
 
 func NewRouter(appEnv string) *gin.Engine {
@@ -19,10 +18,7 @@ func NewRouter(appEnv string) *gin.Engine {
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"success": true,
-				"message": "server is running",
-			})
+			response.OK(c, "server is running", nil)
 		})
 	}
 
