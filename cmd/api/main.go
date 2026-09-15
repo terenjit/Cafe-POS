@@ -8,6 +8,7 @@ import (
 	"github.com/terenjit/Cafe-POS/internal/handler"
 	"github.com/terenjit/Cafe-POS/pkg/database"
 	pkgredis "github.com/terenjit/Cafe-POS/pkg/redis"
+	"github.com/terenjit/Cafe-POS/pkg/validator"
 )
 
 func main() {
@@ -33,7 +34,8 @@ func main() {
 	defer rdb.Close()
 	fmt.Println("Redis connected.")
 
-	r := handler.NewRouter(cfg.App.Env)
+	v := validator.New()
+	r := handler.NewRouter(db, cfg, v)
 
 	fmt.Println("Starting server on port :" + cfg.App.Port)
 	if err := r.Run(":" + cfg.App.Port); err != nil {

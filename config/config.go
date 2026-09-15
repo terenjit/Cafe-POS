@@ -66,7 +66,7 @@ func Load() (*Config, error) {
 	}
 
 	jwtExpiryHours := 24
-	if raw := os.Getenv("JWT_EXPIRY_HOURS"); raw != "" {
+	if raw := os.Getenv("JWT_EXPIRE_HOURS"); raw != "" {
 		if parsed, err := strconv.Atoi(raw); err == nil {
 			jwtExpiryHours = parsed
 		}
