@@ -1,0 +1,112 @@
+package service
+
+import (
+	"context"
+	"errors"
+
+	"github.com/terenjit/Cafe-POS/internal/entity"
+	"github.com/terenjit/Cafe-POS/internal/repository"
+)
+
+type ProductService struct {
+	productRepo  repository.ProductRepository
+	categoryRepo repository.CategoryRepository
+}
+
+func NewProductService(
+	productRepo repository.ProductRepository,
+	categoryRepo repository.CategoryRepository,
+) *ProductService {
+	return &ProductService{productRepo: productRepo, categoryRepo: categoryRepo}
+}
+
+func (s *ProductService) FindAll(ctx context.Context, filter repository.ProductFilter) ([]entity.Product, int, error) {
+	if filter.Page <= 0 {
+		filter.Page = 1
+	}
+	if filter.Limit <= 0 {
+		filter.Limit = 20
+	}
+	return s.productRepo.FindAll(ctx, filter)
+}
+
+func (s *ProductService) FindByID(ctx context.Context, id string) (*entity.Product, error) {
+	product, err := s.productRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if product == nil {
+		return nil, errors.New("product not found")
+	}
+	return product, nil
+}
+
+func (s *ProductService) Create(ctx context.Context, req entity.CreateProductRequest) (*entity.Product, error) {
+	category, err := s.categoryRepo.FindByID(ctx, req.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+	if category == nil {
+		return nil, errors.New("category not found")
+	}
+
+	product := &entity.Product{
+		CategoryID:  req.CategoryID,
+		Name:        req.Name,
+		Description: req.Description,
+		Price:       req.Price,
+		ImageURL:    req.ImageURL,
+		IsActive:    true,
+	}
+
+	if err := s.productRepo.Create(ctx, product); err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (s *ProductService) Update(ctx context.Context, id string, req entity.UpdateProductRequest) (*entity.Product, error) {
+	product, err := s.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.CategoryID != "" {
+		category, err := s.categoryRepo.FindByID(ctx, req.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, errors.New("category not found")
+		}
+		product.CategoryID = req.CategoryID
+	}
+
+	if req.Name != "" {
+		product.Name = req.Name
+	}
+	if req.Description != "" {
+		product.Description = req.Description
+	}
+	if req.Price > 0 {
+		product.Price = req.Price
+	}
+	if req.ImageURL != "" {
+		product.ImageURL = req.ImageURL
+	}
+	if req.IsActive != nil {
+		product.IsActive = *req.IsActive
+	}
+
+	if err := s.productRepo.Update(ctx, product); err != nil {
+		return nil, err
+	}
+	return product, nil
+}
+
+func (s *ProductService) Delete(ctx context.Context, id string) error {
+	if _, err := s.FindByID(ctx, id); err != nil {
+		return err
+	}
+	return s.productRepo.Delete(ctx, id)
+}

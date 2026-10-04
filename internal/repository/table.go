@@ -12,6 +12,7 @@ import (
 
 type TableRepository interface {
 	FindByID(ctx context.Context, id string) (*entity.Table, error)
+	FindByName(ctx context.Context, name string) (*entity.Table, error)
 	FindAll(ctx context.Context) ([]entity.Table, error)
 	Create(ctx context.Context, table *entity.Table) error
 	Update(ctx context.Context, table *entity.Table) error
@@ -37,6 +38,22 @@ func (r *tableRepository) FindByID(ctx context.Context, id string) (*entity.Tabl
 
 	t := &entity.Table{}
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&t.ID, &t.Name, &t.Capacity, &t.Status, &t.CreatedAt, &t.UpdatedAt, &t.DeletedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (r *tableRepository) FindByName(ctx context.Context, name string) (*entity.Table, error) {
+	query := "SELECT id, name, capacity, status, created_at, updated_at, deleted_at FROM `tables` WHERE name = ? AND deleted_at IS NULL"
+
+	t := &entity.Table{}
+	err := r.db.QueryRowContext(ctx, query, name).Scan(
 		&t.ID, &t.Name, &t.Capacity, &t.Status, &t.CreatedAt, &t.UpdatedAt, &t.DeletedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {

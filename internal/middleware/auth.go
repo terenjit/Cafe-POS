@@ -59,7 +59,7 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role := c.GetString("role")
 		if role == "" {
-			response.Unauthorized(c, "Token tidak valid")
+			response.Unauthorized(c, "Invalid token")
 			c.Abort()
 			return
 		}
@@ -71,7 +71,7 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 			}
 		}
 
-		response.Forbidden(c, "Akses ditolak")
+		response.Forbidden(c, "Access denied")
 		c.Abort()
 	}
 }
