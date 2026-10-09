@@ -17,6 +17,7 @@ type ShiftRepository interface {
 	FindAll(ctx context.Context, cashierID string, page, limit int) ([]entity.Shift, int, error)
 	Create(ctx context.Context, shift *entity.Shift) error
 	Close(ctx context.Context, id string, closingCash int64, notes string) error
+	UpdateTotalTransactions(ctx context.Context, id string, total int64) error
 	WithTx(tx *sql.Tx) ShiftRepository
 }
 
@@ -163,6 +164,14 @@ func (r *shiftRepository) Create(ctx context.Context, shift *entity.Shift) error
 		shift.ID, shift.CashierID, shift.OpenedAt, shift.OpeningCash,
 		shift.TotalTransactions, shift.Status, shift.Notes,
 		shift.CreatedAt, shift.UpdatedAt,
+	)
+	return err
+}
+
+func (r *shiftRepository) UpdateTotalTransactions(ctx context.Context, id string, total int64) error {
+	_, err := r.db.ExecContext(ctx,
+		"UPDATE shifts SET total_transactions = ?, updated_at = NOW() WHERE id = ?",
+		total, id,
 	)
 	return err
 }

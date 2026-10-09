@@ -28,6 +28,8 @@ type OrderRepository interface {
 	UpdateItem(ctx context.Context, item *entity.OrderItem) error
 	DeleteItem(ctx context.Context, itemID string) error
 	FindItemByID(ctx context.Context, itemID string) (*entity.OrderItem, error)
+	CountPaidByShiftID(ctx context.Context, shiftID string) (int64, error)
+	RecalculateTotal(ctx context.Context, orderID string) error
 	WithTx(tx *sql.Tx) OrderRepository
 }
 
@@ -253,6 +255,26 @@ func (r *orderRepository) FindItemByID(ctx context.Context, itemID string) (*ent
 		return nil, err
 	}
 	return item, nil
+}
+
+func (r *orderRepository) RecalculateTotal(ctx context.Context, orderID string) error {
+	query := `UPDATE orders SET
+		subtotal   = (SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = ?),
+		total      = (SELECT COALESCE(SUM(subtotal), 0) FROM order_items WHERE order_id = ?) - discount_amount,
+		updated_at = NOW()
+	WHERE id = ?`
+
+	_, err := r.db.ExecContext(ctx, query, orderID, orderID, orderID)
+	return err
+}
+
+func (r *orderRepository) CountPaidByShiftID(ctx context.Context, shiftID string) (int64, error) {
+	var count int64
+	err := r.db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM orders WHERE shift_id = ? AND status = 'paid'",
+		shiftID,
+	).Scan(&count)
+	return count, err
 }
 
 func buildOrderWhere(filter OrderFilter) (string, []interface{}) {
